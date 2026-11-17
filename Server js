@@ -1,0 +1,42 @@
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const path = require('path');
+
+const app = express();
+app.use(express.json());
+app.use(cors());
+app.use(express.static(path.join(__dirname, 'public')));
+
+const PORT = process.env.PORT || 5000;
+
+const projectSchema = new mongoose.Schema({
+    title: String,
+    description: String,
+    techStack: String,
+    link: String
+});
+const Project = mongoose.model('Project', projectSchema);
+
+app.get('/api/projects', async (req, res) => {
+    try {
+        const projects = await Project.find();
+        if (projects.length === 0) {
+            res.json([
+                { title: "Student Management System", description: "Database application for managing college records.", techStack: "Node.js, Express, MongoDB", link: "#" },
+                { title: "E-Commerce Web App", description: "Online shopping platform with cart and checkout features.", techStack: "HTML, CSS, JavaScript", link: "#" }
+            ]);
+        } else {
+            res.json(projects);
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/contact', (req, res) => {
+    const { name, email, message } = req.body;
+    res.json({ success: true, message: `Thank you ${name}, your message has been successfully sent!` });
+});
+
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
